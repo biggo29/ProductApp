@@ -1,6 +1,9 @@
-﻿using System;
+﻿using ProductApps.Models;
+using ProductsApps.Context;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Web;
 using System.Web.Mvc;
 
@@ -8,19 +11,26 @@ namespace ProductApps.Controllers
 {
     public class ProductsController : Controller
     {
+        private ProductsContext db = new ProductsContext();
         // GET: Products
         public ActionResult Index()
         {
-            return View();
+            return View(db.Products.ToList());
         }
 
         // GET: Products/Details/5
-        public ActionResult Details(int id)
+        public ActionResult Details(int? id)
         {
-            return View();
+            if (id == null)
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            Products products = db.Products.Find(id);
+            if (products == null)
+                return HttpNotFound();
+            return View(products);
         }
 
         // GET: Products/Create
+        [HttpGet]
         public ActionResult Create()
         {
             return View();
@@ -28,13 +38,18 @@ namespace ProductApps.Controllers
 
         // POST: Products/Create
         [HttpPost]
-        public ActionResult Create(FormCollection collection)
+        public ActionResult Create(Products products)
         {
             try
             {
                 // TODO: Add insert logic here
+                if (ModelState.IsValid) {
+                    db.Products.Add(products);
+                    db.SaveChanges();
+                    return RedirectToAction("Index");
 
-                return RedirectToAction("Index");
+                }
+                return View(products);
             }
             catch
             {
@@ -43,20 +58,30 @@ namespace ProductApps.Controllers
         }
 
         // GET: Products/Edit/5
-        public ActionResult Edit(int id)
+        public ActionResult Edit(int? id)
         {
-            return View();
+            if (id == null)
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            Products products = db.Products.Find(id);
+            if (products == null)
+                return HttpNotFound();
+            return View(products);
         }
 
         // POST: Products/Edit/5
         [HttpPost]
-        public ActionResult Edit(int id, FormCollection collection)
+        public ActionResult Edit(Products products)
         {
             try
             {
                 // TODO: Add update logic here
-
-                return RedirectToAction("Index");
+                if (ModelState.IsValid)
+                {
+                    db.Entry(products).State = System.Data.Entity.EntityState.Modified;
+                    db.SaveChanges(); 
+                    return RedirectToAction("Index");
+                }
+                return View(products);
             }
             catch
             {
@@ -65,20 +90,36 @@ namespace ProductApps.Controllers
         }
 
         // GET: Products/Delete/5
-        public ActionResult Delete(int id)
+        public ActionResult Delete(int? id)
         {
-            return View();
+            if (id == null)
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            Products products = db.Products.Find(id);
+            if (products == null)
+                return HttpNotFound();
+            return View(products);
         }
 
         // POST: Products/Delete/5
         [HttpPost]
-        public ActionResult Delete(int id, FormCollection collection)
+        public ActionResult Delete(int? id, Products prod)
         {
             try
             {
+                Products products = new Products();
                 // TODO: Add delete logic here
-
-                return RedirectToAction("Index");
+                if (ModelState.IsValid)
+                {
+                    if (id == null)
+                        return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                    products = db.Products.Find(id);
+                    if (products == null)
+                        return HttpNotFound();
+                    db.Products.Remove(products);
+                    db.SaveChanges();
+                    return RedirectToAction("Index");
+                }
+                return View(products);
             }
             catch
             {
