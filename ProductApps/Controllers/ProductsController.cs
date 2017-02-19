@@ -80,6 +80,7 @@ namespace ProductApps.Controllers
                     db.Entry(products).State = System.Data.Entity.EntityState.Modified;
                     db.SaveChanges(); 
                     return RedirectToAction("Index");
+                    //edited
                 }
                 return View(products);
             }
